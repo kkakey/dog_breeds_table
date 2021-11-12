@@ -2,7 +2,6 @@
 output: html_document
 ---
 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warnings = FALSE, message = FALSE, echo = FALSE)
 ```
@@ -113,8 +112,8 @@ div(
         "Most Popular Dog Breeds of 2020"
         ),
     div(align="center", class = "img",
-    img(src="/Users/kristenakey/Downloads/dog.png", 
-        alt = "dog icon from https://www.flaticon.com/free-icon/dog_2064847", 
+    img(src="./project_images/dog.png", 
+        alt = "icon of cartoon dog head with small heart over its head from https://www.flaticon.com/free-icon/dog_2064847", 
         height=30, width=30)),
         div(class = "subtitle", align = "center",
         "A list of all American Kennel Club recognized dog breeds and their traits, ranked by popularity in 2020"
@@ -168,6 +167,8 @@ div(
     div(class = "footnote", 
         align = "right","Table created by: Kristen Akey ", htmltools::tags$a(href = "https://github.com/kkakey", 
                                                            target = "_blank", "@kkakey"), "  •  Nov. 2021"),
+    div(class = "footnote2", 
+        align = "right","Dog icon made by Freepik from www.flaticon.com"),
       br()
 )
 ```
@@ -250,6 +251,12 @@ div(
 .footnote {
   font-weight: 400;
   font-size: 11px;
+  font-family: 'Rockwell', serif;
+}
+
+.footnote2 {
+  font-weight: 200;
+  font-size: 8px;
   font-family: 'Rockwell', serif;
 }
 
