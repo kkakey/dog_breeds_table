@@ -1,0 +1,347 @@
+---
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warnings = FALSE, message = FALSE, echo = FALSE)
+```
+
+```{r}
+library(reactable) # version ‘0.2.3.9000’
+library(htmltools)
+library(reactablefmtr)
+library(tidyverse)
+library(crosstalk)
+```
+
+```{r}
+### Load font from Google Fonts
+tags$link(href = "https://fonts.googleapis.com/css2?family=Bodoni+Moda&display=swap", rel = "stylesheet")
+```
+
+```{r}
+# function to add icons to table originates from this great tutorial: 
+### https://glin.github.io/reactable/articles/cookbook/cookbook.html#rating-stars
+rating_sys <- function(rating, fa_icon, max_rating = 5) {
+  the_icon <- function(empty = FALSE) {
+    tagAppendAttributes(shiny::icon(fa_icon),
+      style = paste("color:", if (empty) "#DBE1E6" else "#FAA916"),
+      "aria-hidden" = "true"
+    )
+  }
+  icons <- lapply(seq_len(max_rating), function(i) {
+    if (i <= rating) the_icon() else the_icon(empty = TRUE)
+  })
+  div(role = "img", icons)
+}
+```
+
+```{r}
+########### Load and Prep Data ###########
+# load data
+df <- read_csv("./df_final_for_table.csv")
+# make some slight modifications to the data
+df <- df[,c(1:3,14,4:13)] # reorder columns
+df <- df %>%
+  select(!Image) %>%
+  mutate(Size = case_when(Size=="small" ~ "S",
+                          Size=="medium" ~ "M",
+                          Size=="large" ~ "L",
+                          Size=="x-large" ~ "XL",
+                          ))
+df$Size <- factor(df$Size, levels = c("S", "M", "L", "XL"))
+# create shared data frame
+df_ct <- SharedData$new(df)
+```
+
+
+```{r warnings = FALSE, message = FALSE, echo = FALSE, class.source="background"}
+########### Create table ###########
+t <- reactable(
+  class = "table",
+  searchable = T,
+  showPageSizeOptions = T,
+  showSortIcon = FALSE,
+  highlight = TRUE,
+  compact = TRUE,
+  fullWidth = T,
+  width = 1000,
+  defaultPageSize = 7,
+  pageSizeOptions = c(5, 7,16, 32, 50, 100),
+  defaultColDef = colDef(headerClass = "header colheader"),
+  df_ct,
+  columns = list(
+      Rank = colDef(minWidth=60, align = "center",
+                    style = list(display = "flex", flexDirection = "column", justifyContent = "center"),
+                    class = "rank"),
+      Breed = colDef(show = FALSE), ## hide name column
+      Image_update = colDef(cell = embed_img(df, label = "Breed", label_position = "right",
+                                             height = 74, width=74), minWidth=250, name = "Breed",
+                            class = "breed_name", sticky = "left"),
+      Size = colDef(minWidth=65, 
+                    class="verticalcenter",
+                    cell = function(value) {
+                      class <- paste0("tag weight-", tolower(value))
+                      div(class = class, value)
+                    }),
+      `Energy Level` = colDef(class="verticalcenter",
+                              cell = function(value) rating_sys(value, "paw")),
+      `Affectionate With Family` = colDef(class="verticalcenter",
+                                          cell = function(value) rating_sys(value, "heart")),
+      `Good With Young Children` = colDef(class="verticalcenter",
+                                          cell = function(value) rating_sys(value, "child")),
+      `Good With Other Dogs` = colDef(class="verticalcenter",
+                                      cell = function(value) rating_sys(value, "dog")),
+      `Barking Level` = colDef(class="verticalcenter",
+                               cell = function(value) rating_sys(value, "volume-up")),
+      `Trainability Level` = colDef(class="verticalcenter"),
+      `Openness To Strangers` = colDef(class="verticalcenter"),
+      `Watchdog/Protective Nature` = colDef(class="verticalcenter", name="Watchdog/  Protective Nature"),
+      `Shedding Level` = colDef(class="verticalcenter")
+  )
+)
+
+```
+
+
+```{r}
+########### Style table ###########
+div(
+    br(),
+    div(class = "title", align = "center",
+        "Most Popular Dog Breeds of 2020"
+        ),
+    div(align="center", class = "img",
+    img(src="/Users/kristenakey/Downloads/dog.png", 
+        alt = "dog icon from https://www.flaticon.com/free-icon/dog_2064847", 
+        height=30, width=30)),
+        div(class = "subtitle", align = "center",
+        "A list of all American Kennel Club recognized dog breeds and their traits, ranked by popularity in 2020"
+        ),
+    br()
+)
+```
+
+<input type="checkbox" id="filtercheck" onclick="showFunction()">
+<label for="filtercheck"> Compare Breeds and Add Filters</label><br>
+
+<div class="bigdiv">
+<input type="checkbox" id="resetcheck" onclick="resetFunction()">
+<label for="resetcheck"> Reset filters</label><br>
+</div>
+ 
+```{r}
+########### Style table continued ###########
+div(
+    div(class="bigdiv",
+      list(
+        filter_select("breed", "Breed", df_ct, ~Breed),
+        filter_checkbox("size", "Size", df_ct, ~Size, inline = T)
+      ),
+       div(class = "traits", 
+        list(
+          div(class = "itemdiv",
+              filter_slider("energy", "Energy Level", df_ct, ~`Energy Level`, width="100%")),
+          div(class = "itemdiv",
+              filter_slider("family", "Affectionate with Family", df_ct, ~`Affectionate With Family`, width="100%")),
+          div(class = "itemdiv",
+              filter_slider("children", "Good with Young Children", df_ct, ~`Good With Young Children`, width="100%")),
+          div(class = "itemdiv",
+              filter_slider("otherdogs", "Good with Other Dogs", df_ct, ~`Good With Other Dogs`, width="100%")),
+          div(class = "itemdiv",
+              filter_slider("bark", "Barking Level", df_ct, ~`Barking Level`, width="100%")),
+          div(class = "itemdiv",
+              filter_slider("train", "Trainability Level", df_ct, ~`Trainability Level`, width="100%")),
+          div(class = "itemdiv",
+              filter_slider("strangers", "Openness To Strangers", df_ct, ~`Openness To Strangers`, width="100%")),
+          div(class = "itemdiv",
+              filter_slider("watch", "Watchdog/Protective Nature", df_ct, ~`Watchdog/Protective Nature`, width="100%")),
+          div(class = "itemdiv",
+              filter_slider("shedding", "Shedding Level", df_ct, ~`Shedding Level`, width="100%"))
+        )
+      )
+    ),
+    t,
+    div(class = "footnote", 
+        align = "right", "Rankings determined by AKC registration statistics  •  Data: American Kennel Club"),
+    div(class = "footnote", 
+        align = "right","Table created by: Kristen Akey ", htmltools::tags$a(href = "https://github.com/kkakey", 
+                                                           target = "_blank", "@kkakey"), "  •  Nov. 2021"),
+      br()
+)
+```
+ 
+ 
+```{css}
+.breed_name {
+  font-size: 12.5px;
+  font-weight: bold;
+  font-family: 'Rockwell', serif;
+}
+
+.rank {
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'Rockwell', serif;
+}
+
+.tag {
+   font-size: 11.5px;
+   font-family: 'Bodoni Moda', serif;
+  display: block;
+  height: 20px;
+  width: 30px;
+  line-height: 20px;
+  text-align: center;
+  -moz-border-radius: 12px; /* or 50% */
+  border-radius: 12px; /* or 50% */
+}
+
+.weight-s {
+  background: #FAE8C7;
+  color: #4B3307;
+}
+
+.weight-m {
+  background: #DDD7EA;
+  color: #241C35;
+}
+
+.weight-l {
+  background: #DEF7F7;
+  color: #104240;
+}
+
+.weight-xl {
+  background: #F3CECE;
+  color: #310C0C;
+}
+
+.table {
+  font-family: 'Bodoni Moda', serif;
+}
+
+/* center text in cells */
+.verticalcenter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 30px;
+  font-family: 'Rockwell', serif;
+}
+
+.subtitle {
+  font-weight: bold;
+  font-size: 15px;
+  width: 600px;
+  overflow-wrap: break-word;
+  hyphens: manual;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  font-family: 'Rockwell', serif;
+}
+
+.footnote {
+  font-weight: 400;
+  font-size: 11px;
+  font-family: 'Rockwell', serif;
+}
+
+.img {
+  padding-bottom: 5px;
+}
+
+label[for="filtercheck"]
+{
+  font-weight: 500;
+  font-size: 14px;
+  font-family: 'Rockwell', serif;
+}
+
+label[for="resetcheck"]
+{
+  font-weight: 400;
+  font-size: 12px;
+  font-family: 'Rockwell', serif;
+}
+
+.filter_header {
+  font-weight: 500;
+  font-size: 14px;
+  font-family: 'Rockwell', serif;
+}
+
+/* Change width of Breed filter box */
+.selectize-input.items.not-full.has-options {
+  max-width: 400px;
+}
+
+/* Make column of filters into row */
+.traits {
+   display: flex;
+   flex-wrap: wrap;
+}
+
+.itemdiv {
+  width:20%;
+  margin-right: 30px;
+}
+
+.bigdiv {
+  display:none;
+  margin-left: 20px;
+  font-family: 'Bodoni Moda', serif;
+}
+
+
+/* Code on column hovering from kcuilla Kyle Cuilla - check out his amazing work! */
+/* https://github.com/kcuilla/2020-RStudio-Table-Contest/blob/master/2019%20NFL%20Team%20Ratings.Rmd */
+/* Column header hover formatting */
+.header:hover,
+.header[aria-sort="ascending"],
+.header[aria-sort="descending"] {
+  background-color: #b3b3b3;
+  color: #fff;
+}
+.header:active,
+.header[aria-sort="ascending"],
+.header[aria-sort="descending"] {
+  background-color: #555;
+  color: #fff;
+}
+/* Column header formatting */
+.colheader {
+  font-size: 15px;
+  border-bottom: 2px solid #555;
+  text-align: center
+}
+```
+
+```{js}
+function showFunction() {
+  var checkBox = document.getElementById("filtercheck");
+  var text = document.getElementsByClassName("bigdiv");
+  if (checkBox.checked == true){
+    for (var i=0;i<text.length;i+=1){
+      text[i].style.display = 'block';
+    }
+  } else {
+    for (var i=0;i<text.length;i+=1){
+      text[i].style.display = 'none';
+    }
+  }
+}
+
+function resetFunction() {
+  var checkBox = document.getElementById("resetcheck");
+  if (checkBox.checked == true){ 
+    location.reload();
+  }
+}
+```
