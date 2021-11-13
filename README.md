@@ -5,4 +5,4 @@ Code used to gather data and create interactive table on AKC Most Popular Dog Br
 ### Project link: https://rpubs.com/kkakey/dog_breeds
 
 - `webscraping_dog_info.Rmd` - code used to webscrape and clean data 
-- `my_table.Rmd` - code used to create interactive table
+- `mytable.Rmd` - code used to create interactive table
