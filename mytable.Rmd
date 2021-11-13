@@ -79,20 +79,20 @@ t <- reactable(
                                              height = 74, width=74), minWidth=250, name = "Breed",
                             class = "breed_name", sticky = "left"),
       Size = colDef(minWidth=65, 
-                    class="verticalcenter",
+                    class="verticalcenter_icons",
                     cell = function(value) {
                       class <- paste0("tag weight-", tolower(value))
                       div(class = class, value)
                     }),
-      `Energy Level` = colDef(class="verticalcenter",
+      `Energy Level` = colDef(class="verticalcenter_icons",
                               cell = function(value) rating_sys(value, "paw")),
-      `Affectionate With Family` = colDef(class="verticalcenter",
+      `Affectionate With Family` = colDef(class="verticalcenter_icons",
                                           cell = function(value) rating_sys(value, "heart")),
-      `Good With Young Children` = colDef(class="verticalcenter",
+      `Good With Young Children` = colDef(class="verticalcenter_icons",
                                           cell = function(value) rating_sys(value, "child")),
-      `Good With Other Dogs` = colDef(class="verticalcenter",
+      `Good With Other Dogs` = colDef(class="verticalcenter_icons",
                                       cell = function(value) rating_sys(value, "dog")),
-      `Barking Level` = colDef(class="verticalcenter",
+      `Barking Level` = colDef(class="verticalcenter_icons",
                                cell = function(value) rating_sys(value, "volume-up")),
       `Trainability Level` = colDef(class="verticalcenter"),
       `Openness To Strangers` = colDef(class="verticalcenter"),
@@ -226,8 +226,17 @@ div(
 /* center text in cells */
 .verticalcenter {
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: center;
+  padding-right: 40px;
+}
+
+/* center text in cells */
+.verticalcenter_icons {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+
 }
 
 .title {
