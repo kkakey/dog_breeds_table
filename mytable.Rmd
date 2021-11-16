@@ -88,16 +88,20 @@ t <- reactable(
                               cell = function(value) rating_sys(value, "paw")),
       `Affectionate With Family` = colDef(class="verticalcenter_icons",
                                           cell = function(value) rating_sys(value, "heart")),
-      `Good With Young Children` = colDef(class="verticalcenter_icons",
+      `Good With Young Children` = colDef(class="verticalcenter",
                                           cell = function(value) rating_sys(value, "child")),
       `Good With Other Dogs` = colDef(class="verticalcenter_icons",
-                                      cell = function(value) rating_sys(value, "dog")),
+                                          cell = function(value) rating_sys(value, "dog")),
       `Barking Level` = colDef(class="verticalcenter_icons",
-                               cell = function(value) rating_sys(value, "volume-up")),
-      `Trainability Level` = colDef(class="verticalcenter"),
-      `Openness To Strangers` = colDef(class="verticalcenter"),
-      `Watchdog/Protective Nature` = colDef(class="verticalcenter", name="Watchdog/  Protective Nature"),
-      `Shedding Level` = colDef(class="verticalcenter")
+                                          cell = function(value) rating_sys(value, "volume-up")),
+      `Trainability Level` = colDef(class="verticalcenter_icons", 
+                                          cell = function(value) rating_sys(value, "circle")),
+      `Openness To Strangers` = colDef(class="verticalcenter_icons",
+                                          cell = function(value) rating_sys(value, "smile")),
+      `Watchdog/Protective Nature` = colDef(class="verticalcenter", name="Watchdog/  Protective Nature",
+                                          cell = function(value) rating_sys(value, "bell"), minWidth=110),
+      `Shedding Level` = colDef(class="verticalcenter",
+                                          cell = function(value) rating_sys(value, "cut"))
   )
 )
 
@@ -228,7 +232,7 @@ div(
   display: flex;
   justify-content: left;
   align-items: center;
-  padding-right: 40px;
+  padding-right: 18px;
 }
 
 /* center text in cells */
